@@ -5,6 +5,7 @@ import Main from './pages/Main'; // Adjust the path if needed
 import Successful from './pages/Successful';
 import Scan from './pages/Scan';
 import LoginMain from './pages/LoginMain';
+import Register from './pages/Register';
 function App() {
 
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/successful" element={<Successful />} />
         <Route path="/scan" element={<Scan />} />
         <Route path="/login" element={<LoginMain />} />
+        <Route path="/register" element={<Register />} />
         {/* Add more routes here as needed */}
       </Routes>
     </Router>

@@ -16,7 +16,7 @@ const Scan = () => {
         </div>
         </div>
         <div className="flex-col relative items-center text-center text-white text-xl mt-16">
-            <p>Move your head slowly to complete</p>
+            <p>Move your head slowly to complet</p>
             <p>the circle</p>
         </div>
         <div className="">

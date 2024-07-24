@@ -73,7 +73,7 @@ const WebcamCapture: React.FC = () => {
 
   return (
     <div className="flex justify-center items-center flex-col">
-      <div className="relative rounded-full overflow-hidden border-4 border-black" style={{ width: 400, height: 400 }}>
+      <div className="relative rounded-full overflow-hidden border-4 border-black" style={{ width: 400, height: 400, top:40 }}>
         <Webcam
           audio={false}
           ref={webcamRef}
@@ -86,8 +86,8 @@ const WebcamCapture: React.FC = () => {
           className="rounded-full"
         />
         <canvas ref={canvasRef} className="absolute top-0 left-0 rounded-full" />
-      </div>
-      <button onClick={registerFace} className="mt-4 p-2 bg-blue-500 text-white rounded">
+      </div >
+      <button onClick={registerFace} className="mt-8 p-2  bg-blue-500 text-white rounded">
         Register Face
       </button>
     </div>
