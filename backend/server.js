@@ -24,3 +24,9 @@ app.use('/api', employeeRoutes);
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+
+//database name is to b checked out and fix webcam.tsx and scn.tsx
+// rest all will be comparatively easy 
+// successful page is left integrate oops section whithin it using ternery
+//and then make a table displaying employee records

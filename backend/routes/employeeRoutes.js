@@ -5,10 +5,10 @@ const router = express.Router();
 
 // Endpoint to register a new face descriptor
 router.post('/register', async (req, res) => {
-  const { name, age, designation, employeeId, faceDescriptor } = req.body;
+  const { name, age, designation, employeeId, descriptor } = req.body;
 
   try {
-    const newEmployee = new Employee({ name, age, designation, employeeId, faceDescriptor });
+    const newEmployee = new Employee({ name, age, designation, employeeId, descriptor });
     await newEmployee.save();
     res.status(201).send('Employee registered successfully');
   } catch (error) {
@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
 // Endpoint to fetch all employee details
 router.get('/employeeDescriptors', async (req, res) => {
   try {
-    const employees = await Employee.find({}, 'name age designation employeeId faceDescriptor');
+    const employees = await Employee.find({}, 'name age designation employeeId descriptor');
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).send('Error retrieving employee descriptors');

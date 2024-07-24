@@ -32,8 +32,18 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode }) => {
       if (mode === 'register' && detections.length > 0) {
         const descriptor = detections[0].descriptor;
         const name = prompt('Enter your name:');
-        if (name) {
-          await axios.post('/api/register', { name, faceDescriptor: descriptor });
+        const age = prompt('Enter your age:');
+        const designation = prompt('Enter your designation:');
+        const employeeId = prompt('Enter your employee ID:');
+
+        if (name && age && designation && employeeId) {
+          await axios.post('/api/register', {
+            name,
+            age,
+            designation,
+            employeeId,
+            faceDescriptor: Array.from(descriptor) // Convert to array
+          });
           alert('Face registered successfully');
         }
       } else if (mode === 'login' && detections.length > 0) {
@@ -42,12 +52,15 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode }) => {
         const employees = response.data;
 
         const labeledDescriptors = employees.map((employee: any) => {
-          return new faceapi.LabeledFaceDescriptors(employee.name, [new Float32Array(employee.faceDescriptor)]);
+          return new faceapi.LabeledFaceDescriptors(
+            employee.name,
+            [new Float32Array(employee.faceDescriptor)]
+          );
         });
 
         const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
         const bestMatch = faceMatcher.findBestMatch(new Float32Array(descriptor));
-        
+
         if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.6) {
           alert(`Welcome, ${bestMatch.label}!`);
         } else {

@@ -6,7 +6,7 @@ const employeeSchema = new mongoose.Schema({
   age: { type: Number, required: true },
   designation: { type: String, required: true },
   employeeId: { type: String, required: true, unique: true },
-  faceDescriptor: { type: [Number], required: true } // Array of numbers for face descriptors
+  descriptor: { type: [Number], required: true } // Array of numbers for face descriptors
 });
 
 // Create a model for the Employee

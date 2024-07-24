@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import WebcamCapture from '@/components/Webcam';
 import SubmitButton from '@/components/SubmitButton';
 import scan from '../assets/images/scan.png';
