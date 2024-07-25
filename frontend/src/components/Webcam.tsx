@@ -4,22 +4,18 @@ import * as faceapi from 'face-api.js';
 import axios from 'axios';
 
 interface WebcamCaptureProps {
-  mode: 'login' | null;
-  onSuccess: () => void;
+  mode: 'register' | 'login' | null;
+  onSuccessfulLogin?: (userId: string) => void; // Callback prop for successful login
 }
 
-const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccess }) => {
+const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const loadModels = async () => {
-    try {
-      await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-      await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-      await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-    } catch (error) {
-      console.error('Error loading models:', error);
-    }
+    await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
   };
 
   useEffect(() => {
@@ -29,6 +25,12 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccess }) => {
   const capture = useCallback(async () => {
     if (webcamRef.current && webcamRef.current.video && canvasRef.current) {
       const video = webcamRef.current.video as HTMLVideoElement;
+
+      if (!video.videoWidth || !video.videoHeight) {
+        console.error('Video dimensions are not available.');
+        return;
+      }
+
       const detections = await faceapi
         .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
@@ -36,72 +38,71 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccess }) => {
 
       if (mode === 'login' && detections.length > 0) {
         const descriptor = detections[0].descriptor;
+
+        if (!descriptor || descriptor.length === 0) {
+          console.error('Face descriptor is missing or empty.');
+          return;
+        }
+
         try {
           const response = await axios.get('http://localhost:5000/api/employeeDescriptors');
           const employees = response.data;
 
-          if (employees.length === 0) {
-            alert('No employee descriptors found. Please contact support.');
-            return;
-          }
-
-          const descriptorLength = descriptor.length;
           const labeledDescriptors = employees.map((employee: any) => {
-            if (!employee.descriptor) {
-              console.warn(`Missing descriptor for employee ${employee.name}`);
-              return null;
-            }
-            if (employee.descriptor.length !== descriptorLength) {
-              console.warn(`Descriptor length mismatch for employee ${employee.name}`);
+            if (!employee.descriptor || employee.descriptor.length === 0) {
+              console.warn(`Missing or empty descriptor for employee ${employee.name}`);
               return null;
             }
             return new faceapi.LabeledFaceDescriptors(
               employee.name,
-              [new Float32Array(employee.descriptor)]
+              [new Float32Array(employee.descriptor)] // Use descriptor from the database
             );
           }).filter(Boolean);
 
           if (labeledDescriptors.length === 0) {
-            alert('No valid face descriptors found. Please contact support.');
+            console.error('No valid descriptors available for matching.');
             return;
           }
 
-          const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
+          const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors as faceapi.LabeledFaceDescriptors[], 0.6);
           const bestMatch = faceMatcher.findBestMatch(new Float32Array(descriptor));
 
           if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.6) {
-            alert(`Welcome, ${bestMatch.label}!`);
-            onSuccess();
+            if (onSuccessfulLogin) {
+              // Pass the user ID to the onSuccessfulLogin callback
+              onSuccessfulLogin(bestMatch.label); 
+            }
           } else {
-            alert('Face not recognized');
+            console.warn('No matching face found or distance too high.');
           }
         } catch (error) {
           console.error('Error comparing faces:', error);
-          alert('An error occurred while comparing faces. Please try again later.');
         }
       }
 
       const canvas = canvasRef.current;
-      canvas.innerHTML = faceapi.createCanvasFromMedia(video).outerHTML;
-      faceapi.matchDimensions(canvas, {
-        width: video.videoWidth,
-        height: video.videoHeight,
-      });
-      const resizedDetections = faceapi.resizeResults(detections, {
-        width: video.videoWidth,
-        height: video.videoHeight,
-      });
-      faceapi.draw.drawDetections(canvas, resizedDetections);
-      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      if (canvas) {
+        canvas.innerHTML = faceapi.createCanvasFromMedia(video).outerHTML;
+        faceapi.matchDimensions(canvas, {
+          width: video.videoWidth,
+          height: video.videoHeight,
+        });
+        const resizedDetections = faceapi.resizeResults(detections, {
+          width: video.videoWidth,
+          height: video.videoHeight,
+        });
+        faceapi.draw.drawDetections(canvas, resizedDetections);
+        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      }
     }
-  }, [webcamRef, canvasRef, mode, onSuccess]);
+  }, [webcamRef, canvasRef, mode, onSuccessfulLogin]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (mode) {
         capture();
       }
-    }, 1000);
+    }, 500);
     return () => clearInterval(interval);
   }, [capture, mode]);
 

@@ -13,7 +13,7 @@ function App() {
       <Router>
       <Routes>
         <Route path="/" element={<Main />} />
-        <Route path="/successful" element={<Successful />} />
+        <Route path="/successful/:employeeId" element={<Successful />} />
         <Route path="/scan" element={<Scan />} />
         <Route path="/login" element={<LoginMain />} />
         <Route path="/register" element={<Register />} />
