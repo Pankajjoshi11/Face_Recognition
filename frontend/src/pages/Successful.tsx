@@ -18,14 +18,16 @@ const Successful: React.FC = () => {
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/employeeDescriptors/`); // Adjust the endpoint as needed
+        const response = await axios.get(`http://localhost:5000/api/employeeDescriptors/${employeeId}`);
         setEmployee(response.data);
       } catch (error) {
         console.error('Error fetching employee details:', error);
       }
     };
 
-    fetchEmployeeDetails();
+    if (employeeId) {
+      fetchEmployeeDetails();
+    }
   }, [employeeId]);
 
   if (!employee) {

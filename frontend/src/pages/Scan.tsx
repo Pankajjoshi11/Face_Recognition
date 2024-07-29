@@ -10,8 +10,10 @@ const Scan: React.FC = () => {
 
   // Function to handle successful login
   const handleSuccessfulLogin = (employeeId: string) => {
+    console.log(`Redirecting to /successful/${employeeId}`);
     navigate(`/successful/${employeeId}`); // Redirect to the Successful page with user ID
   };
+  
 
   return (
     <div className="flex-col max-h-screen">

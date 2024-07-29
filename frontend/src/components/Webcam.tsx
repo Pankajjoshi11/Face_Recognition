@@ -8,6 +8,19 @@ interface WebcamCaptureProps {
   onSuccessfulLogin?: (userId: string) => void; // Callback prop for successful login
 }
 
+interface Employee {
+  name: string;
+  age: number;
+  designation: string;
+  employeeId: string;
+  descriptor: number[];
+}
+
+interface LabeledDescriptor {
+  id: string;
+  labeledDescriptor: faceapi.LabeledFaceDescriptors;
+}
+
 const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }) => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -45,32 +58,38 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }
         }
 
         try {
-          const response = await axios.get('http://localhost:5000/api/employeeDescriptors');
+          const response = await axios.get<Employee[]>('http://localhost:5000/api/employeeDescriptors');
           const employees = response.data;
 
-          const labeledDescriptors = employees.map((employee: any) => {
+          const labeledDescriptors: LabeledDescriptor[] = employees.map(employee => {
             if (!employee.descriptor || employee.descriptor.length === 0) {
               console.warn(`Missing or empty descriptor for employee ${employee.name}`);
               return null;
             }
-            return new faceapi.LabeledFaceDescriptors(
-              employee.name,
-              [new Float32Array(employee.descriptor)] // Use descriptor from the database
-            );
-          }).filter(Boolean);
+            return {
+              id: employee.employeeId, // Include employeeId
+              labeledDescriptor: new faceapi.LabeledFaceDescriptors(
+                employee.name,
+                [new Float32Array(employee.descriptor)] // Use descriptor from the database
+              )
+            };
+          }).filter((ld): ld is LabeledDescriptor => ld !== null);
 
           if (labeledDescriptors.length === 0) {
             console.error('No valid descriptors available for matching.');
             return;
           }
 
-          const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors as faceapi.LabeledFaceDescriptors[], 0.6);
+          const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors.map(ld => ld.labeledDescriptor), 0.6);
           const bestMatch = faceMatcher.findBestMatch(new Float32Array(descriptor));
 
+          console.log(`Best match: ${bestMatch.label}, distance: ${bestMatch.distance}`);
           if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.6) {
-            if (onSuccessfulLogin) {
+            const matchedEmployee = labeledDescriptors.find(ld => ld.labeledDescriptor.label === bestMatch.label);
+            if (onSuccessfulLogin && matchedEmployee) {
               // Pass the user ID to the onSuccessfulLogin callback
-              onSuccessfulLogin(bestMatch.label); 
+              console.log(`Login successful for employee ID: ${matchedEmployee.id}`);
+              onSuccessfulLogin(matchedEmployee.id);
             }
           } else {
             console.warn('No matching face found or distance too high.');
