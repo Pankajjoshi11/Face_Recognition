@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import bgSuccess from '../assets/images/success/bgSuccess.png';
-import john from '../assets/images/success/john.png'; // Replace with dynamic image if available
 import RightDropdown from '@/components/RightDropdown';
 
 const Successful: React.FC = () => {
@@ -14,14 +13,24 @@ const Successful: React.FC = () => {
     age: number;
     image: string; // URL or path to employee image
   } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/employeeDescriptors/${employeeId}`);
-        setEmployee(response.data);
+        const response = await axios.get('http://localhost:5000/api/employeeDescriptors');
+        console.log('API Response:', response.data);
+        
+        // Find the employee by employeeId
+        const foundEmployee = response.data.find((emp: any) => emp.employeeId === employeeId);
+        if (foundEmployee) {
+          setEmployee(foundEmployee);
+        } else {
+          setError('Employee not found');
+        }
       } catch (error) {
         console.error('Error fetching employee details:', error);
+        setError('Failed to fetch employee details. Please try again.');
       }
     };
 
@@ -29,6 +38,10 @@ const Successful: React.FC = () => {
       fetchEmployeeDetails();
     }
   }, [employeeId]);
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   if (!employee) {
     return <div>Loading...</div>; // Or a loading spinner/component
@@ -47,7 +60,7 @@ const Successful: React.FC = () => {
         </div>
         <div className="flex flex-col items-center justify-center mt-16 mb-4 z-5">
           <img 
-            src={employee.image || john} // Display employee image or fallback image
+            src={employee.image} // Display employee image or fallback image
             alt={`${employee.name}'s profile`} 
           />
         </div>
