@@ -5,7 +5,7 @@ import axios from 'axios';
 
 interface WebcamCaptureProps {
   mode: 'register' | 'login' | null;
-  onSuccessfulLogin?: (userId: string) => void; // Callback prop for successful login
+  onSuccessfulLogin?: (userId: string) => void;
 }
 
 interface Employee {
@@ -58,7 +58,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }
         }
 
         try {
-          const response = await axios.get<Employee[]>('http://localhost:5000/api/employeeDescriptors');
+          const response = await axios.get<Employee[]>('http://localhost:5000/api/employees/employeeDescriptors');
           const employees = response.data;
 
           const labeledDescriptors: LabeledDescriptor[] = employees.map(employee => {
@@ -67,10 +67,10 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }
               return null;
             }
             return {
-              id: employee.employeeId, // Include employeeId
+              id: employee.employeeId,
               labeledDescriptor: new faceapi.LabeledFaceDescriptors(
                 employee.name,
-                [new Float32Array(employee.descriptor)] // Use descriptor from the database
+                [new Float32Array(employee.descriptor)]
               )
             };
           }).filter((ld): ld is LabeledDescriptor => ld !== null);
@@ -87,7 +87,6 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }
           if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.6) {
             const matchedEmployee = labeledDescriptors.find(ld => ld.labeledDescriptor.label === bestMatch.label);
             if (onSuccessfulLogin && matchedEmployee) {
-              // Pass the user ID to the onSuccessfulLogin callback
               console.log(`Login successful for employee ID: ${matchedEmployee.id}`);
               onSuccessfulLogin(matchedEmployee.id);
             }

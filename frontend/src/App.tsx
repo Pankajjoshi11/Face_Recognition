@@ -20,6 +20,11 @@ function App() {
         {/* Add more routes here as needed */}
       </Routes>
     </Router>
+
+            {/* seriously watch over sucessful page major changes needed */}
+                    {/* Watch the backend */}
+
+
       
     </>
   )

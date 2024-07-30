@@ -11,17 +11,20 @@ const Successful: React.FC = () => {
     designation: string;
     employeeId: string;
     age: number;
-    image: string; // URL or path to employee image
+    image: string;
+  } | null>(null);
+  const [attendance, setAttendance] = useState<{
+    date: string;
+    checkInTime: string;
+    checkOutTime: string | null;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/employeeDescriptors');
+        const response = await axios.get('http://localhost:5000/api/employees/employeeDescriptors');
         console.log('API Response:', response.data);
-        
-        // Find the employee by employeeId
         const foundEmployee = response.data.find((emp: any) => emp.employeeId === employeeId);
         if (foundEmployee) {
           setEmployee(foundEmployee);
@@ -34,8 +37,23 @@ const Successful: React.FC = () => {
       }
     };
 
+    const fetchAttendanceRecords = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/attendance/${employeeId}`);
+        if (response.data.length > 0) {
+          setAttendance(response.data[0]); // Assuming the latest attendance record is needed
+        } else {
+          setError('No attendance records found for this employee');
+        }
+      } catch (error) {
+        console.error('Error fetching attendance records:', error);
+        setError('Failed to fetch attendance records. Please try again.');
+      }
+    };
+
     if (employeeId) {
       fetchEmployeeDetails();
+      fetchAttendanceRecords();
     }
   }, [employeeId]);
 
@@ -44,7 +62,7 @@ const Successful: React.FC = () => {
   }
 
   if (!employee) {
-    return <div>Loading...</div>; // Or a loading spinner/component
+    return <div>Loading...</div>;
   }
 
   return (
@@ -60,7 +78,7 @@ const Successful: React.FC = () => {
         </div>
         <div className="flex flex-col items-center justify-center mt-16 mb-4 z-5">
           <img 
-            src={employee.image} // Display employee image or fallback image
+            src={employee.image}
             alt={`${employee.name}'s profile`} 
           />
         </div>
@@ -76,20 +94,28 @@ const Successful: React.FC = () => {
           <p>Employee: <span className='text-orange-600'>{employee.name}</span></p>
         </div>
         <section className='flex-col bg-customBlue border font-bold border-white rounded-md mx-16 my-8'>
-          <div className="flex justify-between m-6 px-6">
-            <div className="flex-col text-white p-2">
-              <h3 className='flex justify-between pb-2'>Date</h3>
-              <h3 className='text-orange-600'>3rd May, 2024</h3> {/* Replace with actual date */}
+          {attendance ? (
+            <>
+              <div className="flex justify-between m-6 px-6">
+                <div className="flex-col text-white p-2">
+                  <h3 className='flex justify-between pb-2'>Date</h3>
+                  <h3 className='text-orange-600'>{new Date(attendance.date).toLocaleDateString()}</h3>
+                </div>
+                <div className="flex-col text-white justify-between p-2">
+                  <h3 className='flex justify-between pb-2'>In Time</h3>
+                  <h3 className='text-orange-600'>{new Date(attendance.checkInTime).toLocaleTimeString()}</h3>
+                </div>
+                {/* <div className="flex-col text-white justify-between p-2">
+                  <h3 className='flex justify-between pb-2'>Out Time</h3>
+                  <h3 className='text-orange-600'>{attendance.checkOutTime ? new Date(attendance.checkOutTime).toLocaleTimeString() : 'N/A'}</h3>
+                </div> */}
+              </div>
+            </>
+          ) : (
+            <div className="text-white p-2">
+              <p>No attendance records found for this employee.</p>
             </div>
-            <div className="flex-col text-white justify-between p-2">
-              <h3 className='flex justify-between pb-2'>In Time</h3>
-              <h3 className='text-orange-600'>3rd May, 2024</h3> {/* Replace with actual in time */}
-            </div>
-            <div className="flex-col text-white justify-between p-2">
-              <h3 className='flex justify-between pb-2'>Out Time</h3>
-              <h3 className='text-orange-600'>3rd May, 2024</h3> {/* Replace with actual out time */}
-            </div>
-          </div>
+          )}
           <div className="flex justify-between m-6 px-6">
             <div className="flex-col text-white p-2">
               <h3 className='flex justify-between pb-2'>Employee Id</h3>

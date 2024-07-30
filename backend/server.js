@@ -2,7 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+
 const employeeRoutes = require('./routes/employeeRoutes');
+const attendanceRoutes=require('./routes/attendanceRoutes')
 require('dotenv').config(); // Import and configure dotenv
 
 
@@ -19,7 +21,8 @@ mongoose.connect(process.env.MONGODB_URL)
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
-app.use('/api', employeeRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
