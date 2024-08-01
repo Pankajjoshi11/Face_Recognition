@@ -1,31 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import bgSuccess from '../assets/images/success/bgSuccess.png';
+import { useParams, useNavigate } from 'react-router-dom';
 import RightDropdown from '@/components/RightDropdown';
+import bgSuccess from '../assets/images/success/bgSuccess.png';
+
+interface Employee {
+  name: string;
+  designation: string;
+  employeeId: string;
+  age: number;
+  image: string;
+}
+
+interface AttendanceRecord {
+  date: string;
+  checkInTime: string;
+  checkOutTime: string | null;
+}
 
 const Successful: React.FC = () => {
   const { employeeId } = useParams<{ employeeId: string }>();
-  const [employee, setEmployee] = useState<{
-    name: string;
-    designation: string;
-    employeeId: string;
-    age: number;
-    image: string;
-  } | null>(null);
-  const [attendance, setAttendance] = useState<{
-    date: string;
-    checkInTime: string;
-    checkOutTime: string | null;
-  } | null>(null);
+  const navigate = useNavigate();
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [attendance, setAttendance] = useState<AttendanceRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/employees/employeeDescriptors');
-        console.log('API Response:', response.data);
-        const foundEmployee = response.data.find((emp: any) => emp.employeeId === employeeId);
+        const response = await axios.get<Employee[]>(`http://localhost:5000/api/employees/employeeDescriptors`);
+        const foundEmployee = response.data.find((emp: Employee) => emp.employeeId === employeeId);
+        
         if (foundEmployee) {
           setEmployee(foundEmployee);
         } else {
@@ -39,7 +44,7 @@ const Successful: React.FC = () => {
 
     const fetchAttendanceRecords = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/attendance/${employeeId}`);
+        const response = await axios.get<AttendanceRecord[]>(`http://localhost:5000/api/attendance/${employeeId}`);
         if (response.data.length > 0) {
           setAttendance(response.data[0]); // Assuming the latest attendance record is needed
         } else {
@@ -57,6 +62,12 @@ const Successful: React.FC = () => {
     }
   }, [employeeId]);
 
+  const handleViewAttendance = () => {
+    if (employeeId) {
+      navigate(`/successful/${employeeId}/records`, { state: { employeeId } });
+    }
+  };
+
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
@@ -68,7 +79,7 @@ const Successful: React.FC = () => {
   return (
     <div className="text-white flex-col">
       <div>
-        <RightDropdown />
+        <RightDropdown onViewAttendance={handleViewAttendance} />
       </div>
       <div className="flex-col m-2 p-2 justify-center">
         <h1 className='text-orange-600 gap-2 text-4xl'>Successful!</h1>
@@ -105,10 +116,6 @@ const Successful: React.FC = () => {
                   <h3 className='flex justify-between pb-2'>In Time</h3>
                   <h3 className='text-orange-600'>{new Date(attendance.checkInTime).toLocaleTimeString()}</h3>
                 </div>
-                {/* <div className="flex-col text-white justify-between p-2">
-                  <h3 className='flex justify-between pb-2'>Out Time</h3>
-                  <h3 className='text-orange-600'>{attendance.checkOutTime ? new Date(attendance.checkOutTime).toLocaleTimeString() : 'N/A'}</h3>
-                </div> */}
               </div>
             </>
           ) : (

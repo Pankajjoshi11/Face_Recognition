@@ -6,6 +6,7 @@ import Successful from './pages/Successful';
 import Scan from './pages/Scan';
 import LoginMain from './pages/LoginMain';
 import Register from './pages/Register';
+import AttendanceHistory from './pages/AttendanceHistory';
 function App() {
 
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/scan" element={<Scan />} />
         <Route path="/login" element={<LoginMain />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/successful/:employeeId/records" element={<AttendanceHistory />} />
         {/* Add more routes here as needed */}
       </Routes>
     </Router>
