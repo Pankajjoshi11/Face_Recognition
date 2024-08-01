@@ -13,7 +13,7 @@ const Scan: React.FC = () => {
     console.log(`Redirecting to /successful/${employeeId}`);
 
     try {
-      await axios.post('http://localhost:5000/api/attendance/checkin', { employeeId });
+      await axios.post('https://face-recognition-pcdq.onrender.com/api/attendance/checkin', { employeeId });
     } catch (error) {
       console.error('Error checking in:', error);
     }

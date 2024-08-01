@@ -58,7 +58,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ mode, onSuccessfulLogin }
         }
 
         try {
-          const response = await axios.get<Employee[]>('http://localhost:5000/api/employees/employeeDescriptors');
+          const response = await axios.get<Employee[]>('https://face-recognition-pcdq.onrender.com/api/employees/employeeDescriptors');
           const employees = response.data;
 
           const labeledDescriptors: LabeledDescriptor[] = employees.map(employee => {

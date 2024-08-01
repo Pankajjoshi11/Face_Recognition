@@ -16,7 +16,7 @@ const LoginMain = () => {
   return (
     <div className="flex flex-col relative text-white min-h-screen">
       <div className="">
-        <RightDropdown />
+        <RightDropdown onViewAttendance={() => {}} />
       </div>
 
       <div className="flex justify-center text-customLightBlue font-bold text-4xl mt-12 p-2">

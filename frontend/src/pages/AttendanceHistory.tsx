@@ -28,7 +28,7 @@ const AttendanceHistory: React.FC = () => {
   useEffect(() => {
     const fetchAttendanceRecords = async () => {
       try {
-        const response = await axios.get<AttendanceRecord[]>(`http://localhost:5000/api/attendance/${employeeId}`);
+        const response = await axios.get<AttendanceRecord[]>(`https://face-recognition-pcdq.onrender.com/api/attendance/${employeeId}`);
         setAttendanceRecords(response.data);
       } catch (error) {
         console.error('Error fetching attendance records:', error);
@@ -37,7 +37,7 @@ const AttendanceHistory: React.FC = () => {
 
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/employees/employeeDescriptors');
+        const response = await axios.get('https://face-recognition-pcdq.onrender.com/api/employees/employeeDescriptors');
         const foundEmployee = response.data.find((emp: any) => emp.employeeId === employeeId);
         if (foundEmployee) {
           setEmployeeName(foundEmployee.name);

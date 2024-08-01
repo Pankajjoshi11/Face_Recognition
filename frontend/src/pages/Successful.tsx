@@ -28,7 +28,7 @@ const Successful: React.FC = () => {
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get<Employee[]>(`http://localhost:5000/api/employees/employeeDescriptors`);
+        const response = await axios.get<Employee[]>(`https://face-recognition-pcdq.onrender.com/api/employees/employeeDescriptors`);
         const foundEmployee = response.data.find((emp: Employee) => emp.employeeId === employeeId);
         
         if (foundEmployee) {
@@ -44,7 +44,7 @@ const Successful: React.FC = () => {
 
     const fetchAttendanceRecords = async () => {
       try {
-        const response = await axios.get<AttendanceRecord[]>(`http://localhost:5000/api/attendance/${employeeId}`);
+        const response = await axios.get<AttendanceRecord[]>(`https://face-recognition-pcdq.onrender.com/api/attendance/${employeeId}`);
         if (response.data.length > 0) {
           setAttendance(response.data[0]); // Assuming the latest attendance record is needed
         } else {
