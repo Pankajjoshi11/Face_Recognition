@@ -12,7 +12,7 @@ const Scan = () => {
             style={{ width: 430, height: 430 }} 
         />
         <div className="relative z-10">
-            <WebcamCapture />
+            <WebcamCapture mode='login'/>
         </div>
         </div>
         <div className="flex-col relative items-center text-center text-white text-xl mt-16">
